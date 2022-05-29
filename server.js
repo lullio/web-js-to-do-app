@@ -11,9 +11,12 @@ async function go(){
   await client.connect();
   bd = client.db('Lista-Tarefas-Felipe');
     
-  myApp.listen(3000, "0.0.0.0", (e) => {
+  myApp.listen(3000, "0.0.0.0", () => {
     console.log("listening on port 3000: ");
-    console.log(e.log);  
   });
 }
+go();
 
+myApp.get("/", function(req, res){
+  res.send("teste");
+});
