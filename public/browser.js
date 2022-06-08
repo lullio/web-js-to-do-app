@@ -30,3 +30,40 @@ document.addEventListener("click", function(e){
    }
 })
 
+// CRIAR TAREFA AXIOS
+let 
+inputNomeTarefa = document.getElementById("tarefaNome"),
+inputDescTarefa = document.getElementById("tarefaDesc"),
+inputDescPrio = document.getElementById("tarefaPrioridade"),
+inputDataTarefa = document.getElementById("tarefaData");
+listaUL = document.getElementById("listaUL");
+
+function criarHTML(val){
+   return `
+   <a href="#" class="list-group-item list-group-item-action">
+     <div class="d-flex w-100 justify-content-between">
+       <h5 class="mb-1 texto-tarefa">${val.nomeTarefa}</h5>
+       <small>Tarefa Nº: </small>
+     </div>
+     <p class="mb-1">${val.descTarefa}</p>
+     <small>${val.prioridade}</small>
+     <div class="mt-2">
+      <button data-id="${val._id}" class="me-editar btn btn-secondary btn-sm mr-1">Edit</button>
+      <button data-id="${val._id}" class="delete-me btn btn-danger btn-sm">Delete</button>
+      <small class="mt-2" style="display:block;">Data: ${val.data}</small>
+    </div>
+   </a>`
+}
+
+
+
+document.getElementById("form").addEventListener("submit", function(e){
+   e.preventDefault();
+
+   axios.post('/criar-tarefa', {axiosNomeT: inputNomeTarefa.value, axiosDescT: inputDescTarefa.value, axiosPrio: inputDescPrio.value, axiosData: 'hoje' }).then((response) => {
+      listaUL.insertAdjacentHTML('beforeend', criarHTML(response.data));
+   }).catch((e) => {
+      console.log(e);
+   })
+})
+
