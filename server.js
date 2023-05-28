@@ -9,7 +9,8 @@ myApp.use(express.json());
 const passwordProtected = (req, res, next) => {
   res.set('WWW-Authenticate', 'Basic realm="hi friend"');
   console.log(req.headers.authorization);
-  if(req.headers.authorization == 'Basic amF2YXNjcmlwdDpmdWxsc3RhY2s='){
+  // user: felipe //pass: javascript
+  if(req.headers.authorization == 'Basic ZmVsaXBlOmphdmFzY3JpcHQ='){
     next();
   }else{
     res.status(401).send('rerr error')
@@ -33,7 +34,7 @@ go();
 
 
 myApp.get("/", function(req, res){
-  bd.collection('tarefas').find().toArray(function(err, arr){
+  bd.collection('tarefas').find().toArray(function(err, items){
     res.send(`<html>
     <head>
       <meta charset="UTF-8">
@@ -44,8 +45,9 @@ myApp.get("/", function(req, res){
     <body>
       <div class="container">
         <h1 class="display-4 text-center py-1">Lista de Tarefas - Felipe JS</h1>
+        <!--
         <h4 class="text-left py-1">WebApp desenvolvido com:</h4>
-        <h4 class="text-left py-1"> JavaScript + Node.JS + framework EXPRESS + AXIOS + MongoDB</h4>
+        <h4 class="text-left py-1"> JavaScript + Node.JS + framework EXPRESS + AXIOS + MongoDB</h4>-->
         
         <div class="jumbotron p-3 shadow-sm">
           <form id="form" action="/criar-tarefa" method="POST">
@@ -85,8 +87,7 @@ myApp.get("/", function(req, res){
   
   
         <h1 class="display-4">Lista de Tarefas!</h1>
-      <!--
-        <ul class="list-group pb-5">
+        <ul id="list-item" class="list-group pb-5">
           <li class="list-group-item list-group-item-action d-flex align-items-center justify-content-between">
             <span class="item-text">teste</span>
             <div>
@@ -96,28 +97,12 @@ myApp.get("/", function(req, res){
           </li>
         </ul>
         -->
-        ${arr.filter(function(val){
-          return val.prioridade;
-        }).map(function(val, i , arr){
-          return `
-      <div id="listaUL" class="list-group">
-          <a href="#" class="list-group-item list-group-item-action">
-            <div class="d-flex w-100 justify-content-between">
-              <h5 class="mb-1 texto-tarefa">${val.nomeTarefa}</h5>
-              <small>Tarefa Nº: ${i+1}</small>
-            </div>
-            <p class="mb-1">${val.descTarefa}</p>
-            <small>${val.prioridade}</small>
-            <div class="mt-2">
-             <button data-id="${val._id}" class="me-editar btn btn-secondary btn-sm mr-1">Edit</button>
-             <button data-id="${val._id}" class="delete-me btn btn-danger btn-sm">Delete</button>
-             <small class="mt-2" style="display:block;">Data: ${val.data}</small>
-           </div>
-          </a>
-      </div>
-      `
-        }).join('')}
-        <p>Total de tarefas: ${arr.length}</p>
+        <!--
+        - o browser tem um objeto chamado JSON e método chamado stringify (converte dados javascript/json numa string de texto). Queremos enviar nosso array de objetos do banco de dados(items) db.collection('items').find().toArray(function(err, items)
+        -->
+        <script>
+          let items = ${JSON.stringify(items)}    
+        </script>
         <script type="text/javascript" src="/browser.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     </body>
@@ -125,11 +110,11 @@ myApp.get("/", function(req, res){
 
   });
 });
-
+const d = new Date();
 myApp.post("/criar-tarefas", function(req, res){
   let safeText = sanitizeHTML(req.body.nomeTarefa, {allowedTags: [], allowedAttributes: {}})
-  bd.collection("tarefas").insertOne({nomeTarefa: req.body.nomeTarefa, descTarefa: req.body.descTarefa, data: "PRA HOJE AMIGO", prioridade: req.body.prioridadeTarefa}, () => {
-    res.redirect("/");
+  bd.collection("tarefas").insertOne({nomeTarefa: req.body.nomeTarefa, descTarefa: req.body.descTarefa, data: d, prioridade: req.body.prioridadeTarefa}, (err, info) => {
+    res.json({_id: info.insertedId, text: safeText}) // retornar um objeto javascript para o browser com os nomes  _id contendo o id que o mongodb acabou de criar para o item(insertedId) e text contendo o valor do input do browser
   });
 });
 
@@ -149,6 +134,6 @@ myApp.post("/deletar-tarefa", function(req, res){
 
 myApp.post('/criar-tarefa', function(req, res){
   bd.collection('tarefas').insertOne({nomeTarefa:req.body.axiosNomeT, descTarefa: req.body.axiosDescT, data: req.body.axiosData, prioridade: req.body.axiosPrio  }, function(err, info){
-    res.json({_id: info.insertedId, nomeTarefa:req.body.axiosNomeT, descTarefa: req.body.axiosDescT, data: "PRA HOJE", prioridade: req.body.axiosPrio})
+    res.json({_id: info.insertedId, nomeTarefa:req.body.axiosNomeT, descTarefa: req.body.axiosDescT, data: d, prioridade: req.body.axiosPrio})
   })
 })
